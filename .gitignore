@@ -1,0 +1,7 @@
+downloads/*.zip
+**/.terraform/*
+*.tfstate
+*.tfstate.backup*
+*.tfplan
+**/terraform.tfstate.d/*
+tmp/*
