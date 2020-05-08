@@ -413,20 +413,20 @@ resource "aws_s3_bucket_policy" "stg_s3_stt_bkt_plcy" {
   depends_on = [aws_s3_bucket.stg_s3_stt_bkt, aws_cloudfront_origin_access_identity.stg_cf_stt_oai]
   bucket = aws_s3_bucket.stg_s3_stt_bkt.id
   policy = <<POLICY
+{
+  "Statement": [
     {
-      "Statement":[
-        {
-          "Sid":001,
-          "Effect":"Allow",
-          "Principal":{
-            "CanonicalUser":${aws_cloudfront_origin_access_identity.stg_cf_stt_oai.s3_canonical_user_id}
-          },
-          "Action":["s3:GetObject"],
-          "Resource":${join("", ["arn:aws:s3:::", join("-", [var.stg_s3_stt_bkt_pfx, "stg-s3-stt-bkt"]), "/*"])}
-        }
-      ]
+      "Sid": "001",
+      "Effect": "Allow",
+      "Principal": {
+        "CanonicalUser": "${aws_cloudfront_origin_access_identity.stg_cf_stt_oai.s3_canonical_user_id}"
+      },
+      "Action": ["s3:GetObject"],
+      "Resource": "${join("", ["arn:aws:s3:::", join("-", [var.stg_s3_stt_bkt_pfx, "stg-s3-stt-bkt"]), "/*"])}"
     }
-  POLICY
+  ]
+}
+POLICY
 }
 resource "aws_cloudfront_distribution" "stg_cf_stt_dst" {
   # count = var.env == "STG" ? 1 : 0
