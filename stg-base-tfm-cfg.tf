@@ -39,6 +39,47 @@ variable "vpc_sn_conf" {
 
 data "aws_region" "current" {}
 
+resource "aws_iam_role" "stg_iam_ec2_rl" {
+  # count = var.env == "STG" ? 1 : 0
+  name = "STG-IAM-EC2-RL"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+  path = "/"
+  tags = {
+    Name = "STG-IAM-EC2-RL"
+    Environment = "STG"
+    Region = "us-west-2"
+    Product = "CRM"
+  }
+}
+resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_1" {
+  role = aws_iam_role.stg_iam_ec2_rl.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_2" {
+  role = aws_iam_role.stg_iam_ec2_rl.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodeCommitFullAccess"
+}
+resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_3" {
+  role = aws_iam_role.stg_iam_ec2_rl.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployFullAccess"
+}
+resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_4" {
+  role = aws_iam_role.stg_iam_ec2_rl.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+}
 resource "aws_vpc" "stg_vpc" {
   # count = var.env == "STG" ? 1 : 0
   cidr_block = var.stg_vpc_cidr_blk
