@@ -16,12 +16,15 @@ provider "aws" {
 
 variable "env" {
   type = string
+  description = "CRM Environment."
 }
 variable "stg_vpc_cidr_blk" {
   type = string
+  description = "STG VPC CIDR Block."
 }
 variable "stg_s3_stt_bkt_pfx" {
   type = string
+  description = "STG S3 Static Bucket Prefix."
 }
 variable "vpc_sn_conf" {
   type = map
@@ -510,6 +513,7 @@ resource "aws_cloudfront_distribution" "stg_cf_stt_dst" {
       restriction_type = "none"
     }
   }
+  wait_for_deployment = false
   tags = {
     Name = "STG-CF-STT-DST"
     Environment = "STG"
