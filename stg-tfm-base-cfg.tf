@@ -401,7 +401,7 @@ resource "aws_s3_bucket" "stg_s3_stt_bkt" {
   }
 }
 resource "aws_s3_access_point" "stg_s3_stt_vpc_acss_pt" {
-  bucket = aws_s3_bucket.stg_s3_stt_bkt.arn
+  bucket = aws_s3_bucket.stg_s3_stt_bkt.id
   name = "stg-s3-stt-vpc-acss-pt"
   public_access_block_configuration {
     block_public_acls = true
@@ -414,7 +414,7 @@ resource "aws_s3_access_point" "stg_s3_stt_vpc_acss_pt" {
   }
 }
 resource "aws_s3_access_point" "stg_s3_stt_int_acss_pt" {
-  bucket = aws_s3_bucket.stg_s3_stt_bkt.arn
+  bucket = aws_s3_bucket.stg_s3_stt_bkt.id
   name = "stg-s3-stt-int-acss-pt"
   policy = <<POLICY
 {
@@ -485,7 +485,7 @@ resource "aws_cloudfront_distribution" "stg_cf_stt_dst" {
     min_ttl = 0
     max_ttl = 31536000
     smooth_streaming = false
-    target_origin_id = "S3Origin"
+    target_origin_id = "S3-${aws_s3_bucket.stg_s3_stt_bkt.id}"
     viewer_protocol_policy = "allow-all"
     forwarded_values {
       query_string = false
