@@ -41,6 +41,7 @@ variable "vpc_sn_conf" {
 }
 
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "stg_iam_ec2_rl" {
   # count = var.env == "STG" ? 1 : 0
@@ -71,24 +72,12 @@ resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_1" {
   role = aws_iam_role.stg_iam_ec2_rl.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
-resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_2" {
-  role = aws_iam_role.stg_iam_ec2_rl.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCodeCommitFullAccess"
-}
-resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_3" {
-  role = aws_iam_role.stg_iam_ec2_rl.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployFullAccess"
-}
-resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_4" {
-  role = aws_iam_role.stg_iam_ec2_rl.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-}
 resource "aws_vpc" "stg_vpc" {
-  # count = var.env == "STG" ? 1 : 0
   cidr_block = var.stg_vpc_cidr_blk
   enable_dns_support = true
   enable_dns_hostnames = true
   instance_tenancy = "default"
+  assign_generated_ipv6_cidr_block = false
   tags = {
     Name = "STG-VPC"
     Environment = "STG"
@@ -97,7 +86,6 @@ resource "aws_vpc" "stg_vpc" {
   }
 }
 resource "aws_internet_gateway" "stg_vpc_ig" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   tags = {
@@ -108,7 +96,6 @@ resource "aws_internet_gateway" "stg_vpc_ig" {
   }
 }
 resource "aws_route_table" "stg_vpc_rtt_pub" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_internet_gateway.stg_vpc_ig]
   vpc_id = aws_vpc.stg_vpc.id
   route {
@@ -123,7 +110,6 @@ resource "aws_route_table" "stg_vpc_rtt_pub" {
   }
 }
 resource "aws_route_table" "stg_vpc_rtt_pvt" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   tags = {
@@ -134,7 +120,6 @@ resource "aws_route_table" "stg_vpc_rtt_pvt" {
   }
 }
 resource "aws_subnet" "stg_vpc_app_sn_1" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["app_sn_1"]["cidr"]
@@ -147,13 +132,11 @@ resource "aws_subnet" "stg_vpc_app_sn_1" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_app_sn_1_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_app_sn_1, aws_route_table.stg_vpc_rtt_pvt]
   subnet_id = aws_subnet.stg_vpc_app_sn_1.id
   route_table_id = aws_route_table.stg_vpc_rtt_pvt.id
 }
 resource "aws_subnet" "stg_vpc_app_sn_2" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["app_sn_2"]["cidr"]
@@ -166,13 +149,11 @@ resource "aws_subnet" "stg_vpc_app_sn_2" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_app_sn_2_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_app_sn_2, aws_route_table.stg_vpc_rtt_pvt]
   subnet_id = aws_subnet.stg_vpc_app_sn_2.id
   route_table_id = aws_route_table.stg_vpc_rtt_pvt.id
 }
 resource "aws_subnet" "stg_vpc_redis_sn_1" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["redis_sn_1"]["cidr"]
@@ -185,13 +166,11 @@ resource "aws_subnet" "stg_vpc_redis_sn_1" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_redis_sn_1_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_redis_sn_1, aws_route_table.stg_vpc_rtt_pvt]
   subnet_id = aws_subnet.stg_vpc_redis_sn_1.id
   route_table_id = aws_route_table.stg_vpc_rtt_pvt.id
 }
 resource "aws_subnet" "stg_vpc_redis_sn_2" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["redis_sn_2"]["cidr"]
@@ -204,13 +183,11 @@ resource "aws_subnet" "stg_vpc_redis_sn_2" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_redis_sn_2_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_redis_sn_2, aws_route_table.stg_vpc_rtt_pvt]
   subnet_id = aws_subnet.stg_vpc_redis_sn_2.id
   route_table_id = aws_route_table.stg_vpc_rtt_pvt.id
 }
 resource "aws_subnet" "stg_vpc_nat_sn_1" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["nat_sn_1"]["cidr"]
@@ -223,13 +200,11 @@ resource "aws_subnet" "stg_vpc_nat_sn_1" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_nat_sn_1_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_nat_sn_1, aws_route_table.stg_vpc_rtt_pub]
   subnet_id = aws_subnet.stg_vpc_nat_sn_1.id
   route_table_id = aws_route_table.stg_vpc_rtt_pub.id
 }
 resource "aws_subnet" "stg_vpc_nat_sn_2" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["nat_sn_2"]["cidr"]
@@ -242,13 +217,11 @@ resource "aws_subnet" "stg_vpc_nat_sn_2" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_nat_sn_2_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_nat_sn_2, aws_route_table.stg_vpc_rtt_pub]
   subnet_id = aws_subnet.stg_vpc_nat_sn_2.id
   route_table_id = aws_route_table.stg_vpc_rtt_pub.id
 }
 resource "aws_subnet" "stg_vpc_lb_sn_1" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["lb_sn_1"]["cidr"]
@@ -261,13 +234,11 @@ resource "aws_subnet" "stg_vpc_lb_sn_1" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_lb_sn_1_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_lb_sn_1, aws_route_table.stg_vpc_rtt_pub]
   subnet_id = aws_subnet.stg_vpc_lb_sn_1.id
   route_table_id = aws_route_table.stg_vpc_rtt_pub.id
 }
 resource "aws_subnet" "stg_vpc_lb_sn_2" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   cidr_block = var.vpc_sn_conf["lb_sn_2"]["cidr"]
@@ -280,13 +251,11 @@ resource "aws_subnet" "stg_vpc_lb_sn_2" {
   }
 }
 resource "aws_route_table_association" "stg_vpc_lb_sn_2_rtt_ass" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_subnet.stg_vpc_lb_sn_2, aws_route_table.stg_vpc_rtt_pub]
   subnet_id = aws_subnet.stg_vpc_lb_sn_2.id
   route_table_id = aws_route_table.stg_vpc_rtt_pub.id
 }
 resource "aws_security_group" "stg_vpc_nat_sg" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   name = "STG-VPC-NAT-SG"
@@ -317,7 +286,6 @@ resource "aws_security_group" "stg_vpc_nat_sg" {
   }
 }
 resource "aws_security_group" "stg_vpc_lb_sg" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc]
   vpc_id = aws_vpc.stg_vpc.id
   name = "STG-VPC-LB-SG"
@@ -326,12 +294,6 @@ resource "aws_security_group" "stg_vpc_lb_sg" {
     protocol = "tcp"
     from_port = 80
     to_port = 80
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    protocol = "tcp"
-    from_port = 5000
-    to_port = 5000
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
@@ -348,28 +310,21 @@ resource "aws_security_group" "stg_vpc_lb_sg" {
   }
 }
 resource "aws_security_group" "stg_vpc_app_sg" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_security_group.stg_vpc_nat_sg, aws_security_group.stg_vpc_lb_sg]
   vpc_id = aws_vpc.stg_vpc.id
   name = "STG-VPC-App-SG"
   description = "STG VPC App Security Group."
   ingress {
     protocol = "tcp"
-    from_port = 22
-    to_port = 22
-    security_groups = [aws_security_group.stg_vpc_nat_sg.id]
-  }
-  ingress {
-    protocol = "tcp"
-    from_port = 80
-    to_port = 80
-    security_groups = [aws_security_group.stg_vpc_lb_sg.id]
-  }
-  ingress {
-    protocol = "tcp"
     from_port = 5000
     to_port = 5000
     security_groups = [aws_security_group.stg_vpc_lb_sg.id]
+  }
+  ingress {
+    protocol = "tcp"
+    from_port = 22
+    to_port = 22
+    security_groups = [aws_security_group.stg_vpc_nat_sg.id]
   }
   egress {
     protocol = "-1"
@@ -385,22 +340,21 @@ resource "aws_security_group" "stg_vpc_app_sg" {
   }
 }
 resource "aws_security_group" "stg_vpc_redis_sg" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_security_group.stg_vpc_nat_sg, aws_security_group.stg_vpc_app_sg]
   vpc_id = aws_vpc.stg_vpc.id
   name = "STG-VPC-Redis-SG"
   description = "STG VPC Redis Security Group."
   ingress {
     protocol = "tcp"
-    from_port = 22
-    to_port = 22
-    security_groups = [aws_security_group.stg_vpc_nat_sg.id]
-  }
-  ingress {
-    protocol = "tcp"
     from_port = 6379
     to_port = 6379
     security_groups = [aws_security_group.stg_vpc_app_sg.id]
+  }
+  ingress {
+    protocol = "tcp"
+    from_port = 22
+    to_port = 22
+    security_groups = [aws_security_group.stg_vpc_nat_sg.id]
   }
   egress {
     protocol = "-1"
@@ -416,7 +370,6 @@ resource "aws_security_group" "stg_vpc_redis_sg" {
   }
 }
 resource "aws_vpc_endpoint" "stg_vpc_s3_ep" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_vpc.stg_vpc, aws_route_table.stg_vpc_rtt_pvt]
   vpc_id = aws_vpc.stg_vpc.id
   service_name = join("", ["com.amazonaws.", data.aws_region.current.name, ".s3"])
@@ -424,7 +377,6 @@ resource "aws_vpc_endpoint" "stg_vpc_s3_ep" {
   route_table_ids = [aws_route_table.stg_vpc_rtt_pvt.id]
 }
 resource "aws_s3_bucket" "stg_s3_stt_bkt" {
-  # count = var.env == "STG" ? 1 : 0
   acl = "private"
   server_side_encryption_configuration {
     rule {
@@ -448,12 +400,55 @@ resource "aws_s3_bucket" "stg_s3_stt_bkt" {
     Product = "CRM"
   }
 }
+resource "aws_s3_access_point" "stg_s3_stt_vpc_acss_pt" {
+  bucket = aws_s3_bucket.stg_s3_stt_bkt.arn
+  name = "stg-s3-stt-vpc-acss-pt"
+  public_access_block_configuration {
+    block_public_acls = true
+    block_public_policy = true
+    ignore_public_acls = true
+    restrict_public_buckets = true
+  }
+  vpc_configuration {
+    vpc_id = aws_vpc.stg_vpc.id
+  }
+}
+resource "aws_s3_access_point" "stg_s3_stt_int_acss_pt" {
+  bucket = aws_s3_bucket.stg_s3_stt_bkt.arn
+  name = "stg-s3-stt-int-acss-pt"
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "001",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/tuto"
+        },
+        "Action": [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        "Resource": [
+            "arn:aws:s3:us-west-2:${data.aws_caller_identity.current.account_id}:accesspoint/stg-s3-stt-int-acss-pt",
+            "arn:aws:s3:us-west-2:${data.aws_caller_identity.current.account_id}:accesspoint/stg-s3-stt-int-acss-pt/object/*"
+        ]
+        }
+    ]
+}
+POLICY
+  public_access_block_configuration {
+    block_public_acls = true
+    block_public_policy = true
+    ignore_public_acls = true
+    restrict_public_buckets = true
+  }
+}
 resource "aws_cloudfront_origin_access_identity" "stg_cf_stt_oai" {
-  # count = var.env == "STG" ? 1 : 0
   comment = "STG CloudFront Static Origin Access Identity."
 }
 resource "aws_s3_bucket_policy" "stg_s3_stt_bkt_plcy" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_s3_bucket.stg_s3_stt_bkt, aws_cloudfront_origin_access_identity.stg_cf_stt_oai]
   bucket = aws_s3_bucket.stg_s3_stt_bkt.id
   policy = <<POLICY
@@ -473,12 +468,11 @@ resource "aws_s3_bucket_policy" "stg_s3_stt_bkt_plcy" {
 POLICY
 }
 resource "aws_cloudfront_distribution" "stg_cf_stt_dst" {
-  # count = var.env == "STG" ? 1 : 0
   depends_on = [aws_s3_bucket.stg_s3_stt_bkt, aws_cloudfront_origin_access_identity.stg_cf_stt_oai, aws_s3_bucket_policy.stg_s3_stt_bkt_plcy]
   comment = "STG CloudFront Static Distribution."
   origin {
     domain_name = aws_s3_bucket.stg_s3_stt_bkt.bucket_regional_domain_name
-    origin_id = "S3Origin"
+    origin_id = "S3-${aws_s3_bucket.stg_s3_stt_bkt.id}"
     s3_origin_config {
       origin_access_identity = join("/", ["origin-access-identity", "cloudfront", aws_cloudfront_origin_access_identity.stg_cf_stt_oai.id])
     }
