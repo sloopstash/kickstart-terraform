@@ -4,4 +4,6 @@ downloads/*.zip
 *.tfstate.backup*
 *.tfplan
 **/terraform.tfstate.d/*
+.terraform.lock.hcl
+*.log
 tmp/*
