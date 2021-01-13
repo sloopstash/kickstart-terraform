@@ -26,6 +26,10 @@ variable "stg_s3_stt_bkt_pfx" {
   type = string
   description = "STG S3 Static Bucket Prefix."
 }
+variable "stg_ec2_key_pair" {
+  type = string
+  description = "STG EC2 Key Pair."
+}
 variable "vpc_sn_conf" {
   type = map
   default = {
@@ -39,12 +43,19 @@ variable "vpc_sn_conf" {
     "lb_sn_2" = { "az" = "us-west-2b", "cidr" = "10.2.8.0/24" }
   }
 }
+variable "ec2_ami_conf" {
+  type = map
+  default = {
+    "app" = { "id" = "ami-0a36eb8fadc976275" }
+    "redis" = { "id" = "ami-0a36eb8fadc976275" }
+    "nat" = { "id" = "ami-009816cdbb1e74ceb" }
+  }
+}
 
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "stg_iam_ec2_rl" {
-  # count = var.env == "STG" ? 1 : 0
   name = "STG-IAM-EC2-RL"
   assume_role_policy = <<EOF
 {
@@ -71,6 +82,11 @@ EOF
 resource "aws_iam_role_policy_attachment" "stg_iam_ec2_rl_plcy_1" {
   role = aws_iam_role.stg_iam_ec2_rl.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+resource "aws_iam_instance_profile" "stg_iam_ec2_rl_inst_pf" {
+  depends_on = [aws_iam_role.stg_iam_ec2_rl]
+  path = "/"
+  role = aws_iam_role.stg_iam_ec2_rl.name
 }
 resource "aws_vpc" "stg_vpc" {
   cidr_block = var.stg_vpc_cidr_blk
@@ -118,6 +134,12 @@ resource "aws_route_table" "stg_vpc_rtt_pvt" {
     Region = "us-west-2"
     Product = "CRM"
   }
+}
+resource "aws_route" "stg_vpc_rtt_pvt_rt_1" {
+  depends_on = [aws_vpc.stg_vpc, aws_route_table.stg_vpc_rtt_pvt, aws_instance.stg_ec2_nat_sr_1]
+  route_table_id = aws_route_table.stg_vpc_rtt_pvt.id
+  destination_cidr_block = "0.0.0.0/0"
+  instance_id = aws_instance.stg_ec2_nat_sr_1.id
 }
 resource "aws_subnet" "stg_vpc_app_sn_1" {
   depends_on = [aws_vpc.stg_vpc]
@@ -510,6 +532,32 @@ resource "aws_cloudfront_distribution" "stg_cf_stt_dst" {
   wait_for_deployment = false
   tags = {
     Name = "STG-CF-STT-DST"
+    Environment = "STG"
+    Region = "us-west-2"
+    Product = "CRM"
+  }
+}
+resource "aws_instance" "stg_ec2_nat_sr_1" {
+  depends_on = [aws_iam_instance_profile.stg_iam_ec2_rl_inst_pf, aws_vpc.stg_vpc, aws_subnet.stg_vpc_nat_sn_2, aws_security_group.stg_vpc_nat_sg]
+  ami = var.ec2_ami_conf["nat"]["id"]
+  availability_zone = var.vpc_sn_conf["nat_sn_2"]["az"]
+  tenancy = "default"
+  ebs_optimized = false
+  disable_api_termination = false
+  instance_initiated_shutdown_behavior = "stop"
+  instance_type = "t2.micro"
+  key_name = var.stg_ec2_key_pair
+  security_groups = [aws_security_group.stg_vpc_nat_sg]
+  subnet_id = aws_subnet.stg_vpc_nat_sn_2
+  associate_public_ip_address = true
+  private_ip = "10.2.6.10"
+  source_dest_check = false
+  iam_instance_profile = aws_iam_instance_profile.stg_iam_ec2_rl_inst_pf
+  credit_specification {
+    cpu_credits = "standard"
+  }
+  tags = {
+    Name = "STG-EC2-NAT-SR-1"
     Environment = "STG"
     Region = "us-west-2"
     Product = "CRM"
