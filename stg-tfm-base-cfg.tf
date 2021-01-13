@@ -516,11 +516,6 @@ resource "aws_cloudfront_distribution" "stg_cf_stt_dst" {
   }
 }
 
-output "stg_vpc_id" {
-  depends_on = [aws_vpc.stg_vpc]
-  value = aws_vpc.stg_vpc.id
-}
-
 output "stg_cf_stt_dst_url" {
   depends_on = [aws_cloudfront_distribution.stg_cf_stt_dst]
   value = aws_cloudfront_distribution.stg_cf_stt_dst.domain_name
