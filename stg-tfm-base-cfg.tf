@@ -547,7 +547,7 @@ resource "aws_instance" "stg_ec2_nat_sr_1" {
   instance_initiated_shutdown_behavior = "stop"
   instance_type = "t2.micro"
   key_name = var.stg_ec2_key_pair
-  security_groups = [aws_security_group.stg_vpc_nat_sg.id]
+  vpc_security_group_ids = [aws_security_group.stg_vpc_nat_sg.id]
   subnet_id = aws_subnet.stg_vpc_nat_sn_2.id
   associate_public_ip_address = true
   private_ip = "10.2.6.10"
