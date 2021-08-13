@@ -1,4 +1,10 @@
+downloads/*.rpm
+downloads/*.deb
+downloads/*.tar.gz
 downloads/*.zip
+secret/*.pem
+secret/*.pub
+secret/node*
 **/.terraform/*
 *.tfstate
 *.tfstate.backup*
