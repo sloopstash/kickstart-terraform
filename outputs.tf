@@ -1,3 +1,3 @@
-output "aws" {
-  value = module.aws
+output "aws_crm" {
+  value = module.aws_crm
 }

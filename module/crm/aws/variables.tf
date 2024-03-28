@@ -6,11 +6,11 @@ variable "ssh_public_key" {
   type = string
   description = "SSH public key."
 }
-variable "aws_s3_bucket_prefix" {
+variable "s3_bucket_prefix" {
   type = number
-  description = "Amazon S3 bucket prefix."
+  description = "S3 bucket prefix."
 }
-variable "aws_ec2_ami_id" {
+variable "ec2_ami_id" {
   type = string
-  description = "Amazon EC2 AMI identifier."
+  description = "EC2 AMI identifier."
 }

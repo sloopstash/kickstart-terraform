@@ -1,2 +1,2 @@
 # Kickstart Terraform
-The ultimate aim of this Terraform starter-kit is to help you automate infrastructure provisioning on AWS cloud using Terraform configuration for running a sample CRM app service and Redis database service.
+Our Terraform starter-kit repository contains Terraform modules, configurations, and other resources required to automate and build cloud infrastructure resources on AWS, GCP, and Azure cloud service providers.
