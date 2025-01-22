@@ -13,3 +13,9 @@ module "aws_crm" {
   s3_bucket_prefix = var.aws_s3_bucket_prefix
   ec2_ami_id = var.aws_ec2_ami_id
 }
+module "aws_kubernetes" {
+  source = "./module/kubernetes/aws"
+  environment = var.environment
+  ssh_public_key = var.ssh_public_key
+  ec2_ami_id = var.aws_ec2_ami_id
+}

@@ -32,21 +32,6 @@ resource "aws_iam_role_policy_attachment" "crm_iam_ec2_rl_plcy_1" {
   role = aws_iam_role.crm_iam_ec2_rl.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
-resource "aws_iam_role_policy_attachment" "crm_iam_ec2_rl_plcy_2" {
-  depends_on = [aws_iam_role.crm_iam_ec2_rl]
-  role = aws_iam_role.crm_iam_ec2_rl.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-}
-resource "aws_iam_role_policy_attachment" "crm_iam_ec2_rl_plcy_3" {
-  depends_on = [aws_iam_role.crm_iam_ec2_rl]
-  role = aws_iam_role.crm_iam_ec2_rl.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-resource "aws_iam_role_policy_attachment" "crm_iam_ec2_rl_plcy_4" {
-  depends_on = [aws_iam_role.crm_iam_ec2_rl]
-  role = aws_iam_role.crm_iam_ec2_rl.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
 resource "aws_iam_instance_profile" "crm_iam_ec2_rl_inst_pf" {
   depends_on = [aws_iam_role.crm_iam_ec2_rl]
   role = aws_iam_role.crm_iam_ec2_rl.name
