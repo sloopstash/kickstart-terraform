@@ -14,3 +14,7 @@ variable "aws_ec2_ami_id" {
   type = string
   description = "Amazon EC2 AMI identifier."
 }
+variable "azure_subscription_id" {
+  type = string
+  description = "Azure subscription identifier."
+}

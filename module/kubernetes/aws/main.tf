@@ -293,10 +293,10 @@ resource "aws_subnet" "kubernetes_vpc_eks_cp_sn_1" {
 }
 resource "aws_route_table_association" "kubernetes_vpc_eks_cp_sn_1_rtt_ass" {
   depends_on = [
-    aws_route_table.kubernetes_vpc_pvt_rtt,
+    aws_route_table.kubernetes_vpc_pub_rtt,
     aws_subnet.kubernetes_vpc_eks_cp_sn_1
   ]
-  route_table_id = aws_route_table.kubernetes_vpc_pvt_rtt.id
+  route_table_id = aws_route_table.kubernetes_vpc_pub_rtt.id
   subnet_id = aws_subnet.kubernetes_vpc_eks_cp_sn_1.id
 }
 resource "aws_subnet" "kubernetes_vpc_eks_cp_sn_2" {
@@ -314,10 +314,10 @@ resource "aws_subnet" "kubernetes_vpc_eks_cp_sn_2" {
 }
 resource "aws_route_table_association" "kubernetes_vpc_eks_cp_sn_2_rtt_ass" {
   depends_on = [
-    aws_route_table.kubernetes_vpc_pvt_rtt,
+    aws_route_table.kubernetes_vpc_pub_rtt,
     aws_subnet.kubernetes_vpc_eks_cp_sn_2
   ]
-  route_table_id = aws_route_table.kubernetes_vpc_pvt_rtt.id
+  route_table_id = aws_route_table.kubernetes_vpc_pub_rtt.id
   subnet_id = aws_subnet.kubernetes_vpc_eks_cp_sn_2.id
 }
 resource "aws_subnet" "kubernetes_vpc_eks_nd_sn_1" {
@@ -463,7 +463,10 @@ resource "aws_security_group" "kubernetes_vpc_loadbalancer_sg" {
   }
 }
 resource "aws_security_group" "kubernetes_vpc_eks_sg" {
-  depends_on = [aws_vpc.kubernetes_vpc_net]
+  depends_on = [
+    aws_vpc.kubernetes_vpc_net,
+    aws_security_group.kubernetes_vpc_bastion_sg
+  ]
   name = "kubernetes-vpc-eks-sg"
   vpc_id = aws_vpc.kubernetes_vpc_net.id
   ingress {
@@ -560,7 +563,6 @@ resource "aws_ecr_repository" "kubernetes_ecr_nginx_repo" {
 resource "aws_eks_cluster" "kubernetes_eks_ct" {
   depends_on = [
     aws_iam_role.kubernetes_iam_eks_rl,
-    aws_vpc.kubernetes_vpc_net,
     aws_subnet.kubernetes_vpc_eks_cp_sn_1,
     aws_subnet.kubernetes_vpc_eks_cp_sn_2,
     aws_subnet.kubernetes_vpc_eks_nd_sn_1,
@@ -580,17 +582,28 @@ resource "aws_eks_cluster" "kubernetes_eks_ct" {
     ]
     security_group_ids = [aws_security_group.kubernetes_vpc_eks_sg.id]
   }
-  version = "1.28"
+  version = "1.29"
   access_config {
     authentication_mode = "API_AND_CONFIG_MAP"
     bootstrap_cluster_creator_admin_permissions = true
   }
   bootstrap_self_managed_addons = true
+  kubernetes_network_config {
+    elastic_load_balancing {
+      enabled = false
+    }
+    ip_family = "ipv4"
+  }
+  storage_config {
+    block_storage {
+      enabled = false
+    }
+  }
   compute_config {
     enabled = false
   }
-  kubernetes_network_config {
-    ip_family = "ipv4"
+  zonal_shift_config {
+    enabled = false
   }
   tags = {
     Name = "kubernetes-eks-ct"
@@ -603,7 +616,6 @@ resource "aws_eks_cluster" "kubernetes_eks_ct" {
 resource "aws_eks_node_group" "kubernetes_eks_gnr_ng" {
   depends_on = [
     aws_iam_role.kubernetes_iam_ec2_rl,
-    aws_vpc.kubernetes_vpc_net,
     aws_subnet.kubernetes_vpc_eks_nd_sn_1,
     aws_subnet.kubernetes_vpc_eks_nd_sn_2,
     aws_security_group.kubernetes_vpc_bastion_sg,
@@ -617,7 +629,7 @@ resource "aws_eks_node_group" "kubernetes_eks_gnr_ng" {
     aws_subnet.kubernetes_vpc_eks_nd_sn_1.id,
     aws_subnet.kubernetes_vpc_eks_nd_sn_2.id
   ]
-  version = "1.28"
+  version = "1.29"
   ami_type = "AL2_x86_64"
   capacity_type = "ON_DEMAND"
   instance_types = ["t3a.small"]
