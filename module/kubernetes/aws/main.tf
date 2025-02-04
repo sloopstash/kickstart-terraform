@@ -422,7 +422,7 @@ resource "aws_security_group" "kubernetes_vpc_nat_sg" {
     protocol = "-1"
     from_port = 0
     to_port = 0
-    cidr_blocks = [var.environment == "prd" ? "11.1.0.0/16" : "12.1.0.0/16"]
+    cidr_blocks = [var.environment == "prd" ? "11.11.0.0/16" : "12.11.0.0/16"]
   }
   egress {
     protocol = "-1"
