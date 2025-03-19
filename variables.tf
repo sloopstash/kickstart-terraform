@@ -18,3 +18,15 @@ variable "azure_subscription_id" {
   type = string
   description = "Azure subscription identifier."
 }
+variable "azure_vm_image_id" {
+  type        = string
+  description = "Managed Image ID"
+}
+variable "azure_storage_account_prefix" {
+  type        = string
+  description = "Storage Account Prefix"
+}
+variable "my_ip" {
+  type        = string
+  description = "Your public IP address"
+}
