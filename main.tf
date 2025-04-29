@@ -6,13 +6,21 @@ terraform {
   }
   backend "local" {}
 }
-
 module "aws_crm" {
   source = "./module/crm/aws"
   environment = var.environment
   ssh_public_key = var.ssh_public_key
   s3_bucket_prefix = var.aws_s3_bucket_prefix
   ec2_ami_id = var.aws_ec2_ami_id
+}
+module "azure_crm" {
+  source = "./module/crm/azure"
+  environment = var.environment
+  ssh_public_key = var.ssh_public_key
+  storage_account_prefix = var.azure_storage_account_prefix
+  vm_image_id = var.azure_vm_image_id
+  subscription_id = var.azure_subscription_id
+  my_ip = var.my_ip
 }
 module "aws_kubernetes" {
   source = "./module/kubernetes/aws"
