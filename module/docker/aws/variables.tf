@@ -2,21 +2,9 @@ variable "environment" {
   type = string
   description = "Environment."
 }
-variable "iam_ec2_rl_arn" {
-  type = string
-  description = "IAM EC2 role identifier."
-}
 variable "vpc_net_id" {
   type = string
   description = "VPC network identifier."
-}
-variable "vpc_loadbalancer_sn_1_id" {
-  type = string
-  description = "VPC loadbalancer subnet 1 identifier."
-}
-variable "vpc_loadbalancer_sn_2_id" {
-  type = string
-  description = "VPC loadbalancer subnet 2 identifier."
 }
 variable "vpc_pvt_rtt_id" {
   type = string
@@ -29,8 +17,4 @@ variable "vpc_bastion_sg_id" {
 variable "vpc_loadbalancer_sg_id" {
   type = string
   description = "VPC loadbalancer security group identifier."
-}
-variable "ec2_rsa_kp_id" {
-  type = string
-  description = "EC2 RSA key pair identifier."
 }
